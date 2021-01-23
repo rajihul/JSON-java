@@ -709,6 +709,34 @@ public class XML {
         return toJSONObject(new StringReader(string), config);
     }
 
+    //[RJ ADDED] Overloaded static method
+    public static JSONObject toJSONObject(Reader reader, JSONPointer path)
+    {
+        //System.out.println("instantiated Rahul method");
+        JSONObject jo = new JSONObject();
+        XMLParserConfiguration config = new XMLParserConfiguration();
+        XMLTokener x = new XMLTokener(reader);
+        while (x.more()) {
+            x.skipPast("<");
+            if(x.more()) {
+                parse(x, jo, null, XMLParserConfiguration.ORIGINAL);
+                //System.out.println(x.toString());
+            }
+        }
+
+        //System.out.println("PrintingJSON");
+
+        Object query = jo.query(path.toString());
+        System.out.println(query);
+        return (JSONObject) query;
+
+        //System.out.println(checkPath);
+       // return XML.toJSONObject(checkPath.toString());
+       // System.out.println(checkPath);
+        //return jo;//(new JSONObject((jo.query(path.toString()))));
+
+    }
+
     /**
      * Convert a JSONObject into a well-formed, element-normal XML string.
      *
