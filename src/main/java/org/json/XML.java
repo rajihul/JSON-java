@@ -712,29 +712,108 @@ public class XML {
     //[RJ ADDED] Overloaded static method
     public static JSONObject toJSONObject(Reader reader, JSONPointer path)
     {
-        //System.out.println("instantiated Rahul method");
+        //Need substring to take out first / so can use split successfully.
+        String[] pathArray = path.toString().substring(1).split("[\\\\/]", -1);
+        int pathSize = pathArray.length;
+
+
         JSONObject jo = new JSONObject();
         XMLParserConfiguration config = new XMLParserConfiguration();
         XMLTokener x = new XMLTokener(reader);
+
+        //Find the last non-numerical tag in pathArray
+        int containsNumber = 0; //index of array where number is
+        for(int i = 0; i < pathSize; i ++)
+        {
+            if(pathArray[i].matches("-?\\d+(\\.\\d+)?"))
+            {
+                containsNumber = i;
+            }
+        }
+System.out.println("Contains number: " + containsNumber);
+        String parseTag;// = (containsNumber == 0) ? pathArray[pathSize - 1] : pathArray[containsNumber - 1];
+        if(containsNumber == 0)
+        {
+            parseTag = pathArray[pathSize -1];
+        }
+        else
+        {
+            if(pathSize < 2)
+            {
+                parseTag = pathArray[0];
+            }
+            else
+            {
+                parseTag = pathArray[containsNumber - 1];
+            }
+        }
+        String remArr = "";
+
+        //Need to get the new string array that can use JSONPointer to solve
+        if(containsNumber != 0)
+        {
+            for(int z = containsNumber-1; z < pathSize; z ++)
+                remArr +=  "/" + pathArray[z];
+        }
+
+        System.out.println("remArr: " + remArr);
+        System.out.println("Parse Tag: " + parseTag);
+
+        //rebuild the sub xml
+        String rebuildXML = "";
+        boolean cycle = false;
+
+        String currTag ="";
+
+        String startString = "<" + parseTag + ">";
+        String exitString = "</" + parseTag + ">";
+
         while (x.more()) {
             x.skipPast("<");
-            if(x.more()) {
-                parse(x, jo, null, XMLParserConfiguration.ORIGINAL);
-                //System.out.println(x.toString());
+            currTag = "<" + x.nextContent();
+            //System.out.println(currTag);
+
+            //Start recording after start string reached.
+            if(currTag.equalsIgnoreCase(startString))
+                cycle = true;
+
+
+            if(cycle)
+            {
+                rebuildXML += currTag;
+                //System.out.println("Pre If: " + currTag);
             }
+
+            //Start recording after start string reached.
+            if(currTag.equalsIgnoreCase(exitString))
+            {
+                if(containsNumber != 0)
+                    cycle = false;
+                else
+                    break;
+            }
+        }
+
+        System.out.println(rebuildXML);
+        JSONObject query = XML.toJSONObject(rebuildXML);
+        System.out.println(query.toString());
+
+        if(containsNumber != 0)
+        {
+            Object jsquery = query.query(remArr);
+            //System.out.println(jsquery);
+            query = (JSONObject) jsquery;
         }
 
         //System.out.println("PrintingJSON");
 
-        Object query = jo.query(path.toString());
-        System.out.println(query);
-        return (JSONObject) query;
+        return query;
 
-        //System.out.println(checkPath);
-       // return XML.toJSONObject(checkPath.toString());
-       // System.out.println(checkPath);
-        //return jo;//(new JSONObject((jo.query(path.toString()))));
+    }
 
+    public static JSONObject toJSONObject(Reader reader, JSONPointer path, JSONObject replacement)
+    {
+        return null;
     }
 
     /**

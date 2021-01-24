@@ -34,7 +34,7 @@ public class XMLTest_SWE262 {
 
         try {
             FileReader filereader = new FileReader("src/test/resources/file.xml");
-            JSONObject jo = XML.toJSONObject(filereader, new JSONPointer("/clinical_study"));
+            JSONObject jo = XML.toJSONObject(filereader, new JSONPointer("/clinical_study/required_header/1"));
 
             System.out.println(jo);
 
