@@ -46,4 +46,26 @@ public class XMLTest_SWE262 {
         //JSONObject jsonObject = XML.toJSONObject(xmlStr);
         //assertTrue("xml string should be empty", jsonObject.isEmpty());
     }
+
+    @Test
+    public void testMethodTwo()
+    {
+        System.out.println("\nIn Test Method 2");
+
+        try {
+            FileReader filereader = new FileReader("src/test/resources/Catalog.xml");
+            JSONObject jo = XML.toJSONObject(filereader, new JSONPointer("/catalog/book"), XML.toJSONObject("<tname>rahul jain</tname>"));
+
+            System.out.println(jo);
+
+            System.out.println("Testing out JSON to XML Conversion");
+
+            System.out.println(XML.toString(jo));
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+            e.printStackTrace();
+        }
+
+    }
 }

@@ -730,7 +730,9 @@ public class XML {
                 containsNumber = i;
             }
         }
-System.out.println("Contains number: " + containsNumber);
+
+        System.out.println("Contains number: " + containsNumber);
+
         String parseTag;// = (containsNumber == 0) ? pathArray[pathSize - 1] : pathArray[containsNumber - 1];
         if(containsNumber == 0)
         {
@@ -765,8 +767,8 @@ System.out.println("Contains number: " + containsNumber);
 
         String currTag ="";
 
-        String startString = "<" + parseTag + ">";
-        String exitString = "</" + parseTag + ">";
+        String startString = "<" + parseTag;
+        String exitString = "</" + parseTag;
 
         while (x.more()) {
             x.skipPast("<");
@@ -774,7 +776,7 @@ System.out.println("Contains number: " + containsNumber);
             //System.out.println(currTag);
 
             //Start recording after start string reached.
-            if(currTag.equalsIgnoreCase(startString))
+            if(currTag.contains(startString))
                 cycle = true;
 
 
@@ -785,7 +787,7 @@ System.out.println("Contains number: " + containsNumber);
             }
 
             //Start recording after start string reached.
-            if(currTag.equalsIgnoreCase(exitString))
+            if(currTag.contains(exitString))
             {
                 if(containsNumber != 0)
                     cycle = false;
@@ -813,7 +815,128 @@ System.out.println("Contains number: " + containsNumber);
 
     public static JSONObject toJSONObject(Reader reader, JSONPointer path, JSONObject replacement)
     {
-        return null;
+        //Logic
+        //Get the JSONObject (or XML) up to a certain nonnumerical path - done
+        //Concert the replacement to a JSONObject
+        //Merge the tw
+
+        //Need substring to take out first / so can use split successfully.
+        String[] pathArray = path.toString().substring(1).split("[\\\\/]", -1);
+        int pathSize = pathArray.length;
+
+        String replacementXML = toString(replacement);
+
+        JSONObject jo = new JSONObject();
+        XMLParserConfiguration config = new XMLParserConfiguration();
+        XMLTokener x = new XMLTokener(reader);
+
+        //Find the last non-numerical tag in pathArray
+        int containsNumber = 0; //index of array where number is
+        for(int i = 0; i < pathSize; i ++)
+        {
+            if(pathArray[i].matches("-?\\d+(\\.\\d+)?"))
+            {
+                containsNumber = i;
+            }
+        }
+
+        System.out.println("Contains number: " + containsNumber);
+
+        String parseTag;// = (containsNumber == 0) ? pathArray[pathSize - 1] : pathArray[containsNumber - 1];
+        if(containsNumber == 0)
+        {
+            parseTag = pathArray[pathSize -1];
+        }
+        else
+        {
+            if(pathSize < 2)
+            {
+                parseTag = pathArray[0];
+            }
+            else
+            {
+                parseTag = pathArray[containsNumber - 1];
+            }
+        }
+        String remArr = "";
+
+        //Need to get the new string array that can use JSONPointer to solve
+        if(containsNumber != 0)
+        {
+            for(int z = containsNumber-1; z < pathSize; z ++)
+                remArr +=  "/" + pathArray[z];
+        }
+
+        System.out.println("remArr: " + remArr);
+        System.out.println("Parse Tag: " + parseTag);
+
+        //rebuild the sub xml
+        String rebuildXML = "";
+        boolean cycle = true;
+
+        //boolean replacementPast = false;
+        boolean firstPass = false;
+
+        String currTag ="";
+
+        String startString = "<" + parseTag;
+        String exitString = "</" + parseTag;
+
+        //This is where we rebuild the XML
+        while (x.more()) {
+            x.skipPast("<");
+            currTag = "<" + x.nextContent();
+            //System.out.println(currTag);
+
+
+            //Stop recording after start string reached.
+            if(currTag.contains(startString))
+                cycle = false;
+
+
+            if(cycle)
+            {
+                if(firstPass)
+                {
+                    // add the replacement string
+                    rebuildXML += replacementXML;
+
+                    //turn it off
+                    firstPass = false;
+                }
+
+                rebuildXML += currTag;
+                //System.out.println("Pre If: " + currTag);
+            }
+
+            //Start recording after the LAST non-numerical path string is reached.
+            if(currTag.contains(exitString))
+            {
+               // if(containsNumber != 0)
+                cycle = true;
+
+               //Mark that we have been through one iteration of the parse tag
+               //Marking in case we need more in a JSON Array situation.
+               firstPass = true;
+                //else
+                   // break;
+            }
+        }
+
+        System.out.println(rebuildXML);
+        JSONObject query = XML.toJSONObject(rebuildXML);
+        System.out.println(query.toString());
+
+        if(containsNumber != 0)
+        {
+            Object jsquery = query.query(remArr);
+            //System.out.println(jsquery);
+            query = (JSONObject) jsquery;
+        }
+
+        //System.out.println("PrintingJSON");
+
+        return query;
     }
 
     /**
