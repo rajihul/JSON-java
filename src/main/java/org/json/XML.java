@@ -765,6 +765,8 @@ public class XML {
         String rebuildXML = "";
         boolean cycle = false;
 
+        boolean exitLoop = false;
+
         String currTag ="";
 
         String startString = "<" + parseTag;
@@ -776,12 +778,18 @@ public class XML {
             //System.out.println(currTag);
 
             //Start recording after start string reached.
-            if(currTag.contains(startString))
+            if(currTag.contains(startString)) {
                 cycle = true;
-
+                //Needed in case XML has array structure
+                //e.g. <book>...</book><book>...</book>
+                exitLoop = false; //Needed incase JSON has array structure.
+            }
 
             if(cycle)
             {
+                if(exitLoop)
+                    break;
+
                 rebuildXML += currTag;
                 //System.out.println("Pre If: " + currTag);
             }
@@ -789,22 +797,28 @@ public class XML {
             //Start recording after start string reached.
             if(currTag.contains(exitString))
             {
+                exitLoop = true;
                 if(containsNumber != 0)
                     cycle = false;
                 else
-                    break;
+                    cycle = true;
             }
         }
 
-        System.out.println(rebuildXML);
+        //System.out.println(rebuildXML);
         JSONObject query = XML.toJSONObject(rebuildXML);
-        System.out.println(query.toString());
+        //System.out.println(query.toString());
 
         if(containsNumber != 0)
         {
             Object jsquery = query.query(remArr);
             //System.out.println(jsquery);
-            query = (JSONObject) jsquery;
+            if(jsquery instanceof String)
+                query = new JSONObject().put(pathArray[pathSize - 1], jsquery);
+            else if(jsquery instanceof BigDecimal)
+                query = new JSONObject().put(pathArray[pathSize - 1], jsquery.toString());
+            else
+                query = (JSONObject) jsquery;
         }
 
         //System.out.println("PrintingJSON");
@@ -819,6 +833,11 @@ public class XML {
         //Get the JSONObject (or XML) up to a certain nonnumerical path - done
         //Concert the replacement to a JSONObject
         //Merge the tw
+
+        if(path.toString().equals("/"))
+        {
+            return XML.toJSONObject(XML.toString(replacement));
+        }
 
         //Need substring to take out first / so can use split successfully.
         String[] pathArray = path.toString().substring(1).split("[\\\\/]", -1);
@@ -876,11 +895,16 @@ public class XML {
 
         //boolean replacementPast = false;
         boolean firstPass = false;
-
+        boolean replaceEverything = false;
         String currTag ="";
 
         String startString = "<" + parseTag;
         String exitString = "</" + parseTag;
+
+
+        //If something like / or /catalog, then return everything.
+        if(pathSize < 2)
+            replaceEverything = true;
 
         //This is where we rebuild the XML
         while (x.more()) {
@@ -889,6 +913,10 @@ public class XML {
             //System.out.println(currTag);
 
 
+            if (replaceEverything){
+                rebuildXML = startString + ">" + replacementXML + exitString + ">";
+            break;
+        }
             //Stop recording after start string reached.
             if(currTag.contains(startString))
                 cycle = false;
