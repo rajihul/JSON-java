@@ -273,4 +273,30 @@ public class XMLTest_SWE262 {
         }
     }
 
+    @Test
+    public void testReplaceKey2()
+    {
+        String expectedStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<SWE262_name>\n" +
+                "    <SWE262_email>rajihul@gmail.com</SWE262_email>\n" +
+                "</SWE262_name>";
+        expectedStr = XML.toJSONObject(expectedStr).toString();
+
+        try {
+            //Define the function
+            Function<String, String> keyTransformer= (x) -> ("SWE262_"+x);
+            FileReader filereader = new FileReader("src/test/resources/TransformerTest.xml");
+            JSONObject jo = XML.toJSONObject(filereader, keyTransformer);
+
+            String actualStr = jo.toString();
+            //System.out.println(actualStr);
+            assertEquals(expectedStr, actualStr);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+            e.printStackTrace();
+        }
+
+    }
+
 }
