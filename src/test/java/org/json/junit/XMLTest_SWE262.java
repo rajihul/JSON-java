@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.json.*;
 import org.junit.Rule;
@@ -124,6 +125,146 @@ public class XMLTest_SWE262 {
             JSONObject jo = XML.toJSONObject(filereader, new JSONPointer("/"), XML.toJSONObject("<tname>rahul jain</tname>"));
 
             String actualStr = jo.toString();
+            assertEquals(expectedStr, actualStr);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testMethodThree_replaceKey()
+    {
+        System.out.println("\nIn Test Method three");
+        String expectedStr = "<?xml version=\"1.0\"?>\n" +
+                "<RJ_catalog>\n" +
+                "    <RJ_book id=\"bk101\">\n" +
+                "        <RJ_author>Gambardella, Matthew</RJ_author>\n" +
+                "        <RJ_title>XML Developer's Guide</RJ_title>\n" +
+                "        <RJ_genre>Computer</RJ_genre>\n" +
+                "        <RJ_price>44.95</RJ_price>\n" +
+                "        <RJ_publish_date>2000-10-01</RJ_publish_date>\n" +
+                "        <RJ_description>An in-depth look at creating applications\n" +
+                "            with XML.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk102\">\n" +
+                "        <RJ_author>Ralls, Kim</RJ_author>\n" +
+                "        <RJ_title>Midnight Rain</RJ_title>\n" +
+                "        <RJ_genre>Fantasy</RJ_genre>\n" +
+                "        <RJ_price>5.95</RJ_price>\n" +
+                "        <RJ_publish_date>2000-12-16</RJ_publish_date>\n" +
+                "        <RJ_description>A former architect battles corporate zombies, an evil sorceress, and her own childhood to become queen of the world.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk103\">\n" +
+                "        <RJ_author>Corets, Eva</RJ_author>\n" +
+                "        <RJ_title>Maeve Ascendant</RJ_title>\n" +
+                "        <RJ_genre>Fantasy</RJ_genre>\n" +
+                "        <RJ_price>5.95</RJ_price>\n" +
+                "        <RJ_publish_date>2000-11-17</RJ_publish_date>\n" +
+                "        <RJ_description>After the collapse of a nanotechnology\n" +
+                "            society in England, the young survivors lay the\n" +
+                "            foundation for a new society.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk104\">\n" +
+                "        <RJ_author>Corets, Eva</RJ_author>\n" +
+                "        <RJ_title>Oberon's Legacy</RJ_title>\n" +
+                "        <RJ_genre>Fantasy</RJ_genre>\n" +
+                "        <RJ_price>5.95</RJ_price>\n" +
+                "        <RJ_publish_date>2001-03-10</RJ_publish_date>\n" +
+                "        <RJ_description>In post-apocalypse England, the mysterious\n" +
+                "            agent known only as Oberon helps to create a new life\n" +
+                "            for the inhabitants of London. Sequel to Maeve\n" +
+                "            Ascendant.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk105\">\n" +
+                "        <RJ_author>Corets, Eva</RJ_author>\n" +
+                "        <RJ_title>The Sundered Grail</RJ_title>\n" +
+                "        <RJ_genre>Fantasy</RJ_genre>\n" +
+                "        <RJ_price>5.95</RJ_price>\n" +
+                "        <RJ_publish_date>2001-09-10</RJ_publish_date>\n" +
+                "        <RJ_description>The two daughters of Maeve, half-sisters,\n" +
+                "            battle one another for control of England. Sequel to\n" +
+                "            Oberon's Legacy.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk106\">\n" +
+                "        <RJ_author>Randall, Cynthia</RJ_author>\n" +
+                "        <RJ_title>Lover Birds</RJ_title>\n" +
+                "        <RJ_genre>Romance</RJ_genre>\n" +
+                "        <RJ_price>4.95</RJ_price>\n" +
+                "        <RJ_publish_date>2000-09-02</RJ_publish_date>\n" +
+                "        <RJ_description>When Carla meets Paul at an ornithology\n" +
+                "            conference, tempers fly as feathers get ruffled.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk107\">\n" +
+                "        <RJ_author>Thurman, Paula</RJ_author>\n" +
+                "        <RJ_title>Splish Splash</RJ_title>\n" +
+                "        <RJ_genre>Romance</RJ_genre>\n" +
+                "        <RJ_price>4.95</RJ_price>\n" +
+                "        <RJ_publish_date>2000-11-02</RJ_publish_date>\n" +
+                "        <RJ_description>A deep sea diver finds true love twenty\n" +
+                "            thousand leagues beneath the sea.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk108\">\n" +
+                "        <RJ_author>Knorr, Stefan</RJ_author>\n" +
+                "        <RJ_title>Creepy Crawlies</RJ_title>\n" +
+                "        <RJ_genre>Horror</RJ_genre>\n" +
+                "        <RJ_price>4.95</RJ_price>\n" +
+                "        <RJ_publish_date>2000-12-06</RJ_publish_date>\n" +
+                "        <RJ_description>An anthology of horror stories about roaches,\n" +
+                "            centipedes, scorpions  and other insects.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk109\">\n" +
+                "        <RJ_author>Kress, Peter</RJ_author>\n" +
+                "        <RJ_title>Paradox Lost</RJ_title>\n" +
+                "        <RJ_genre>Science Fiction</RJ_genre>\n" +
+                "        <RJ_price>6.95</RJ_price>\n" +
+                "        <RJ_publish_date>2000-11-02</RJ_publish_date>\n" +
+                "        <RJ_description>After an inadvertant trip through a Heisenberg\n" +
+                "            Uncertainty Device, James Salway discovers the problems\n" +
+                "            of being quantum.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk110\">\n" +
+                "        <RJ_author>O'Brien, Tim</RJ_author>\n" +
+                "        <RJ_title>Microsoft .NET: The Programming Bible</RJ_title>\n" +
+                "        <RJ_genre>Computer</RJ_genre>\n" +
+                "        <RJ_price>36.95</RJ_price>\n" +
+                "        <RJ_publish_date>2000-12-09</RJ_publish_date>\n" +
+                "        <RJ_description>Microsoft's .NET initiative is explored in\n" +
+                "            detail in this deep programmer's reference.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk111\">\n" +
+                "        <RJ_author>O'Brien, Tim</RJ_author>\n" +
+                "        <RJ_title>MSXML3: A Comprehensive Guide</RJ_title>\n" +
+                "        <RJ_genre>Computer</RJ_genre>\n" +
+                "        <RJ_price>36.95</RJ_price>\n" +
+                "        <RJ_publish_date>2000-12-01</RJ_publish_date>\n" +
+                "        <RJ_description>The Microsoft MSXML3 parser is covered in\n" +
+                "            detail, with attention to XML DOM interfaces, XSLT processing,\n" +
+                "            SAX and more.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "    <RJ_book id=\"bk112\">\n" +
+                "        <RJ_author>Galos, Mike</RJ_author>\n" +
+                "        <RJ_title>Visual Studio 7: A Comprehensive Guide</RJ_title>\n" +
+                "        <RJ_genre>Computer</RJ_genre>\n" +
+                "        <RJ_price>49.95</RJ_price>\n" +
+                "        <RJ_publish_date>2001-04-16</RJ_publish_date>\n" +
+                "        <RJ_description>Microsoft Visual Studio 7 is explored in depth,\n" +
+                "            looking at how Visual Basic, Visual C++, C#, and ASP+ are\n" +
+                "            integrated into a comprehensive development\n" +
+                "            environment.</RJ_description>\n" +
+                "    </RJ_book>\n" +
+                "</RJ_catalog>";
+
+        expectedStr = XML.toJSONObject(expectedStr).toString();
+        try {
+            //Define the function
+            Function<String, String> keyTransformer= (x) -> ("RJ_"+x);
+            FileReader filereader = new FileReader("src/test/resources/Catalog.xml");
+            JSONObject jo = XML.toJSONObject(filereader, keyTransformer);
+
+            String actualStr = jo.toString();
+            //System.out.println(actualStr);
             assertEquals(expectedStr, actualStr);
 
         } catch (FileNotFoundException e) {
