@@ -972,30 +972,16 @@ public class XML {
     //of keyTransformer output.
     public static JSONObject toJSONObject(Reader reader, Function<String, String> keyTransformer)
     {
-
-        JSONObject jo = new JSONObject();
-        XMLParserConfiguration config = new XMLParserConfiguration();
         XMLTokener x = new XMLTokener(reader);
-
 
         //rebuild the sub xml
         String rebuildXML = "";
-        boolean cycle = false;
-
-        boolean exitLoop = false;
 
         String currTag ="";
-
-        //String startString = "<" + parseTag;
-        //String exitString = "</" + parseTag;
 
         while (x.more()) {
             x.skipPast("<");
             currTag = "<" + x.nextContent();
-            //System.out.println(currTag);
-
-            //Start recording after start string reached.
-
 
             //Current tag holds the tag <> with possible info afterwards.
             //1. Extract the first word after opening tag openTag = <book id=...
@@ -1020,7 +1006,6 @@ public class XML {
                 //This should contain what's in the current line tag
                 String oldTag = tag[0].substring(tag[0].indexOf("<") + +1);
 
-
                 //2. Feed the openTag to keyTransformer function. Set it to new variable newTag.
                 String newTag = keyTransformer.apply(oldTag);
 
@@ -1028,21 +1013,16 @@ public class XML {
                 currTag = currTag.replaceAll(oldTag,newTag);; //+ something
             }
 
-
             rebuildXML += currTag;
             //System.out.println("Pre If: " + currTag);
         }
 
         //System.out.println(rebuildXML);
         JSONObject query = XML.toJSONObject(rebuildXML);
-        //System.out.println(query.toString());
-
-
-        //System.out.println("PrintingJSON");
 
         return query;
-        //return null;
     }
+
     /**
      * Convert a JSONObject into a well-formed, element-normal XML string.
      *
