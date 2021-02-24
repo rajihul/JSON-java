@@ -29,8 +29,9 @@ import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Iterator;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 
 /**
@@ -1007,7 +1008,7 @@ public class XML {
                 String oldTag = tag[0].substring(tag[0].indexOf("<") + +1);
 
                 //2. Feed the openTag to keyTransformer function. Set it to new variable newTag.
-                String newTag = keyTransformer.apply(oldTag);
+                String newTag = keyTransformer.apply(oldTag );
 
                 //3. Replace openTag with newTag in currTag.
                 currTag = currTag.replaceAll(oldTag,newTag);; //+ something
@@ -1021,6 +1022,54 @@ public class XML {
         JSONObject query = XML.toJSONObject(rebuildXML);
 
         return query;
+    }
+
+    /**
+     * MILESTONE 4 METHOD: Implementing Streams
+     * Feb 21, 2021
+     */
+
+    public static Stream<String> toStream(JSONObject obj)
+    {
+        /***Takes an already established JSON Object and converts it into
+        an XML object: **/
+        String jsonXML = XML.toString(obj);
+
+        //Now we can play with our XML
+        // a type of collections so that the Streams can act upon it.
+        /*************************************************************/
+        XMLTokener x = new XMLTokener(jsonXML);
+
+        //rebuild the sub xml
+        String rebuildXML = "";
+
+        String currTag ="";
+
+        ArrayList<String>  listOfTags = new ArrayList<>();
+
+        while (x.more()) {
+            x.skipPast("<");
+            currTag = "<" + x.nextContent();
+            //System.out.println(currTag);
+            //Current tag holds the tag <> with possible info afterwards.
+            //1. Extract the first word after opening tag openTag = <book id=...
+            //   we want book.
+            listOfTags.add(currTag);
+
+            //rebuildXML += currTag;
+            //System.out.println("Pre If: " + currTag);
+        }
+
+        //System.out.println(rebuildXML);
+        //JSONObject query = XML.toJSONObject(rebuildXML);
+        /*************************************************************/
+
+        //Break ito a list of something (either key value map or json pointers)
+        //Stream of?
+        //key/value pairs
+        //json pointers
+
+        return (listOfTags).stream();
     }
 
     /**

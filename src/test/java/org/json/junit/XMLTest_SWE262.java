@@ -7,9 +7,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.json.*;
 import org.junit.Rule;
@@ -263,6 +266,9 @@ public class XMLTest_SWE262 {
             FileReader filereader = new FileReader("src/test/resources/Catalog.xml");
             JSONObject jo = XML.toJSONObject(filereader, keyTransformer);
 
+           System.out.println(XML.toString(jo));
+           XML.toStream(jo);
+
             String actualStr = jo.toString();
             //System.out.println(actualStr);
             assertEquals(expectedStr, actualStr);
@@ -297,6 +303,79 @@ public class XMLTest_SWE262 {
             e.printStackTrace();
         }
 
+    }
+
+    @Test
+    public void testStream()
+    {
+        String expectedStr = "<SWE262_email>rajihul@gmail.com</SWE262_email>";
+
+        String Str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<SWE262_name>\n" +
+                "    <SWE262_email>rajihul@gmail.com</SWE262_email>\n" +
+                "</SWE262_name>";
+
+        //expectedStr = XML.toJSONObject(expectedStr).toString();
+        String actualStr = "";
+
+        try {
+            //Define the function
+            //Function<String, String> keyTransformer= (x) -> ("SWE262_"+x);
+            FileReader filereader = new FileReader("src/test/resources/TransformerTest.xml");
+            JSONObject jo = XML.toJSONObject(Str);
+
+            List<String> trstr = XML.toStream(jo)
+                   // .forEach(x -> x.replace("SWE262","RJ"))
+                    .filter(x->x.contains("SWE262_email"))
+                    .collect(Collectors.toList());
+
+            for(String i:trstr)
+                actualStr +=  i;
+
+            //System.out.println(actualStr);
+            //System.out.println(actualStr);
+            assertEquals(expectedStr, actualStr);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+            e.printStackTrace();
+        }
+    }
+    @Test
+    public void testStream2()
+    {
+        String expectedStr = "<SWE262_name></SWE262_name>";
+
+        String Str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<SWE262_name>\n" +
+                "    <SWE262_email>rajihul@gmail.com</SWE262_email>\n" +
+                "</SWE262_name>";
+
+        //expectedStr = XML.toJSONObject(expectedStr).toString();
+        String actualStr = "";
+
+        try {
+            //Define the function
+            //Function<String, String> keyTransformer= (x) -> ("SWE262_"+x);
+            FileReader filereader = new FileReader("src/test/resources/TransformerTest.xml");
+            JSONObject jo = XML.toJSONObject(Str);
+
+            List<String> trstr = XML.toStream(jo)
+                    // .forEach(x -> x.replace("SWE262","RJ"))
+                    .filter(x->!x.contains("SWE262_email"))
+                    .collect(Collectors.toList());
+
+            for(String i:trstr)
+                actualStr +=  i;
+
+            System.out.println(actualStr);
+            //System.out.println(actualStr);
+            assertEquals(expectedStr, actualStr);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+            e.printStackTrace();
+        }
     }
 
 }
