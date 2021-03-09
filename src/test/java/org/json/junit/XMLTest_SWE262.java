@@ -378,6 +378,7 @@ public class XMLTest_SWE262 {
         }
     }
 
+    /** For Milestone 5 **/
     @Test
     public void async()
     {
@@ -387,7 +388,7 @@ public class XMLTest_SWE262 {
         {
             FileReader filereader = new FileReader("src/test/resources/Catalog.xml");
             FileWriter filewriter = new FileWriter("output.json");
-            XML.toJSONObject(filereader,  (JSONObject joo) -> joo.write(filewriter), true);
+            XML.toJSONObject(filereader,  (JSONObject joo) -> joo.write(filewriter), (Exception e)-> e.printStackTrace());
             //XML.toJSONObject();
             expectedStr = XML.toJSONObject(filereader).toString();
 
@@ -420,6 +421,51 @@ public class XMLTest_SWE262 {
             e.printStackTrace();
         }
 
+    }
+
+    /** For Milestone 5 **/
+    @Test
+    public void async_exception()
+    {
+        String expectedStr = "";
+        //Generate output.txt
+        try
+        {
+            //The baddata file doens't have closing tag so should throw exception
+            FileReader filereader = new FileReader("src/test/resources/baddata.xml");
+            FileWriter filewriter = new FileWriter("output.json");
+            XML.toJSONObject(filereader,  (JSONObject joo) -> joo.write(filewriter), (Exception e)-> System.out.println("Something  went wrong!"));
+            //XML.toJSONObject();
+            expectedStr = XML.toJSONObject(filereader).toString();
+
+
+            //Give thread adequate time to finish
+            try{
+                Thread.sleep(1000);
+
+            }catch(InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+
+            //filewriter.flush();
+            filewriter.close();
+        }catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        //Compare the output.txt to the Catalog.xml JSON
+        try
+        {
+            FileReader filereader = new FileReader("output.json");
+            JSONObject actualJSON = XML.toJSONObject(filereader);
+            assertEquals(expectedStr, actualJSON.toString());
+
+        }catch(IOException e)
+        {
+            e.printStackTrace();
+        }
 
     }
 
