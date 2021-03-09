@@ -42,7 +42,7 @@ import java.util.stream.Stream;
  * @version 2016-08-10
  */
 @SuppressWarnings("boxing")
-public class XML {
+public class XML{
 
     /** The Character '&amp;'. */
     public static final Character AMP = '&';
@@ -77,6 +77,11 @@ public class XML {
     public static final String NULL_ATTR = "xsi:nil";
 
     public static final String TYPE_ATTR = "xsi:type";
+
+    /** [Milestone 5]
+     * Need to define some global function variables that can be accessed by run function.
+     */
+    //public static Function command, errorHandle;
 
     /**
      * Creates an iterator for navigating Code Points in a string instead of
@@ -1071,6 +1076,45 @@ public class XML {
 
         return (listOfTags).stream();
     }
+
+    public static void toJSONObject(Reader r, Function<JSONObject, Object> command, boolean diff)
+    {
+        //Reader r, Function commander, Function errorHandler
+        //Take the inputs and store them in global variables for later use in run function
+        //command = commander;
+        //errorHandle = errorHandler;
+        String outstr = "outside the thread rj";
+        JSONObject myJSON = toJSONObject(r);
+
+        Runnable runnable = () -> {
+            System.out.println("Inside : " + outstr);
+            System.out.println(myJSON.toString());
+            command.apply(myJSON);
+        };
+
+        System.out.println("Creating Thread...");
+        Thread thread = new Thread(runnable);
+
+        System.out.println("Starting Thread...");
+        thread.start();
+
+
+        //(new Thread(new XML())).start();
+    }
+
+    /*public void run() {
+        System.out.println("Hello from a thread!");
+        try
+        {
+            //Convert reader to JSON Object and send off.i
+            command.apply();
+
+        } catch (Exception e)
+        {
+            System.out.println();
+        }
+    }*/
+
 
     /**
      * Convert a JSONObject into a well-formed, element-normal XML string.

@@ -378,4 +378,49 @@ public class XMLTest_SWE262 {
         }
     }
 
+    @Test
+    public void async()
+    {
+        String expectedStr = "";
+        //Generate output.txt
+        try
+        {
+            FileReader filereader = new FileReader("src/test/resources/Catalog.xml");
+            FileWriter filewriter = new FileWriter("output.json");
+            XML.toJSONObject(filereader,  (JSONObject joo) -> joo.write(filewriter), true);
+            //XML.toJSONObject();
+            expectedStr = XML.toJSONObject(filereader).toString();
+
+
+            //Give thread adequate time to finish
+            try{
+                Thread.sleep(1000);
+
+            }catch(InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+
+            //filewriter.flush();
+            filewriter.close();
+        }catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        //Compare the output.txt to the Catalog.xml JSON
+        try
+        {
+            FileReader filereader = new FileReader("output.json");
+            JSONObject actualJSON = XML.toJSONObject(filereader);
+            assertEquals(expectedStr, actualJSON.toString());
+
+        }catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+
+
+    }
+
 }
